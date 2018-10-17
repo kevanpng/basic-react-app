@@ -31,6 +31,7 @@ class App extends React.Component {
                 roomId: roomId,
                 hooks: {
                     onNewMessage: message => {
+                        console.log('message.text: ', message.text);
                         this.setState({
                             messages: [...this.state.messages, message]
                         })
@@ -39,7 +40,6 @@ class App extends React.Component {
             })
         })
     }
-
     render() {
         return (
             <div className="app">
@@ -51,5 +51,4 @@ class App extends React.Component {
         );
     }
 }
-
 export default App
