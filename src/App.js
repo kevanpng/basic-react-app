@@ -6,7 +6,6 @@ import RoomList from './components/RoomList'
 import NewRoomForm from './components/NewRoomForm'
 
 import { tokenUrl, instanceLocator,userId, roomId } from './config'
-
 class App extends React.Component {
 
     constructor() {
@@ -24,7 +23,6 @@ class App extends React.Component {
                 url: tokenUrl
             })
         })
-
         chatManager.connect()
         .then(currentUser => {
             currentUser.subscribeToRoom({
