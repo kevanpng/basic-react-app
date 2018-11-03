@@ -12,9 +12,15 @@ class App extends React.Component {
   constructor() {
     super();
     this.state = {
+      roomId: null,
       messages: [],
+      joinableRooms: [],
+      joinedRooms: []
+
     };
     this.sendMessage = this.sendMessage.bind(this);
+    this.subscribeToRoom = this.subscribeToRoom.bind(this);
+    this.getRooms = this.getRooms.bind(this);
   }
 
 
@@ -29,29 +35,56 @@ class App extends React.Component {
     chatManager.connect()
       .then((currentUser) => {
         this.currentUser = currentUser;
-        this.currentUser.subscribeToRoom({
-          roomId,
-          hooks: {
-            onNewMessage: (message) => {
-              this.setState({
-                messages: [...this.state.messages, message],
-              });
-            },
-          },
-        });
-      });
+          this.getRooms()
+      })
+      .catch(err => console.log('error on connecting:', err))
+  }
+
+  getRooms(){
+    this.currentUser.getJoinableRooms()
+      .then(joinableRooms => {
+        this.setState({
+          joinableRooms,
+          joinedRooms: this.currentUser.rooms
+        })
+      })
+      .catch(err => console.log('error on joinableRooms:', err))
+  }
+
+  subscribeToRoom(roomId){
+    this.setState({ messages: [] })
+    this.currentUser.subscribeToRoom({
+      roomId,
+      hooks: {
+        onNewMessage: (message) => {
+          this.setState({
+            messages: [...this.state.messages, message],
+          });
+        },
+      },
+    })
+    .then(room => {
+      this.setState(
+        {
+          roomId:room.id
+        })
+      this.getRooms()
+    })
+    .catch(err => console.log('error  on joinableRooms:', err))
   }
 
   sendMessage(text) {
     this.currentUser.sendMessage({
       text,
-      roomId,
+      roomId: this.state.roomId,
     })
   }
   render() {
     return (
       <div className="app">
-        <RoomList />
+        <RoomList
+          subscribeToRoom={this.subscribeToRoom}
+          rooms={[...this.state.joinableRooms, ...this.state.joinedRooms]} />
         <MessageList messages={this.state.messages} />
         <SendMessageForm sendMessage={this.sendMessage} />
         <NewRoomForm />
